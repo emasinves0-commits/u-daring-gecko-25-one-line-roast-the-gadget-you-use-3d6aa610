@@ -1,7 +1,23 @@
 # AGENT.md
 
-**Entry:** one 80-character line roasting a daily gadget (a toothbrush with a subscription).
+## The entry
 
-**How main.ts works:** it holds the line as a constant, `validateEntry` checks the gate (not blank, at most 200 characters, throws otherwise), then it writes the text exactly, with no trailing newline, to `/output/entry.txt`.
+A fitness-tracker roast, 116 characters:
 
-**Run:** `node main.ts` (Node 22+ runs TypeScript directly). Output is deterministic: 80 bytes, sha256 `edecd5a4a256fc1c817f7c2157d3494c2ce26b54636583d5850ecc6016a99590`.
+> My fitness tracker's Sleep Score dropped to 42 because I lay there staring at the ceiling for nine straight minutes.
+
+It replaces the earlier toothbrush-subscription line.
+
+## How main.ts works
+
+- Holds the entry as a single constant.
+- `validateEntry()` rejects blank text and anything over 200 characters.
+- Creates `/output` if needed and writes `/output/entry.txt` as UTF-8, with no trailing newline.
+- `--self-test` writes the file, reads it back and checks it is byte-identical to the entry.
+
+Run with `bun main.ts` or `bun main.ts --self-test`.
+
+## Measured output
+
+`/output/entry.txt`: 116 bytes, 116 characters, sha256
+`628b79daac4d0f56d076d09ba20a34830f324dfd86b97aa5f63fc7c3875648d5`
