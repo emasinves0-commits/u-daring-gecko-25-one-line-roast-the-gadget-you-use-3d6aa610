@@ -1,10 +1,12 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const ENTRY =
-  "My toothbrush asked me to renew its subscription, so now my teeth are paywalled.";
+  "My fitness tracker's Sleep Score dropped to 42 because I lay there staring at the ceiling for nine straight minutes.";
 
-// Gate: /output/entry.txt must be UTF-8 text of 1-200 characters and not only
-// whitespace. Fail loudly here rather than ship an entry the scorer rejects.
+const OUT_DIR = "/output";
+const OUT_FILE = `${OUT_DIR}/entry.txt`;
+
+// Gate: the entry must be 1-200 characters and not blank.
 function validateEntry(text: string): string {
   const length = [...text].length;
   if (text.trim().length === 0) {
@@ -17,5 +19,24 @@ function validateEntry(text: string): string {
 }
 
 // Written exactly as-is: no trailing newline.
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", validateEntry(ENTRY), "utf8");
+function writeEntry(): void {
+  mkdirSync(OUT_DIR, { recursive: true });
+  writeFileSync(OUT_FILE, validateEntry(ENTRY), "utf8");
+}
+
+// Write, read back, and confirm the bytes match the entry exactly.
+function selfTest(): void {
+  writeEntry();
+  const expected = Buffer.from(ENTRY, "utf8");
+  const actual = readFileSync(OUT_FILE);
+  if (!actual.equals(expected)) {
+    throw new Error("Self-test failed: file differs from the entry text.");
+  }
+  console.log(`self-test OK: ${[...ENTRY].length} chars, ${actual.length} bytes, byte-identical`);
+}
+
+if (process.argv.includes("--self-test")) {
+  selfTest();
+} else {
+  writeEntry();
+}
